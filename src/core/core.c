@@ -295,6 +295,11 @@ const tic_script_config* tic_core_script_config(tic_mem* memory)
         return getSquirrelScriptConfig();
 #endif
 
+#if defined(TIC_BUILD_WITH_RUBY)
+    if (compareMetatag(code, "script", "ruby", getRubyConfig()->singleComment))
+        return getRubyConfig();
+#endif
+
 #if defined(TIC_BUILD_WITH_LUA)
     return getLuaScriptConfig();
 #elif defined(TIC_BUILD_WITH_JS)
@@ -303,6 +308,8 @@ const tic_script_config* tic_core_script_config(tic_mem* memory)
     return getWrenScriptConfig();
 #elif defined(TIC_BUILD_WITH_SQUIRREL)
     return getSquirrelScriptConfig();
+#elif defined(TIC_BUILD_WITH_RUBY)
+    return getRubyConfig();
 #endif
 }
 
@@ -508,6 +515,10 @@ void tic_core_close(tic_mem* memory)
 
 #if defined(TIC_BUILD_WITH_WREN)
     getWrenScriptConfig()->close(memory);
+#endif
+
+#if defined(TIC_BUILD_WITH_RUBY)
+    getRubyConfig()->close(memory);
 #endif
 
     blip_delete(core->blip.left);

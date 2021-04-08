@@ -35,6 +35,7 @@
 #define TIC_BUILD_WITH_JS 		1
 #define TIC_BUILD_WITH_WREN 	1
 #define TIC_BUILD_WITH_SQUIRREL 1
+#define TIC_BUILD_WITH_RUBY     1
 
 #endif
 

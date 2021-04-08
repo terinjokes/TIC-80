@@ -92,6 +92,10 @@ typedef enum
     SquirrelScript,
 #endif
 
+#if defined(TIC_BUILD_WITH_RUBY)
+    Ruby,
+#endif
+
 } ScriptLang;
 
 #if defined(__EMSCRIPTEN__)
@@ -122,6 +126,10 @@ static const char DefaultWrenTicPath[] = TIC_LOCAL_VERSION "default_wren.tic";
 #if defined(TIC_BUILD_WITH_SQUIRREL)
 static const char DefaultSquirrelTicPath[] = TIC_LOCAL_VERSION "default_squirrel.tic";
 #endif  
+
+#if defined(TIC_BUILD_WITH_RUBY)
+static const char DefaultRubyTicPath[] = TIC_LOCAL_VERSION "default_ruby.tic";
+#endif
 
 static const char* getName(const char* name, const char* ext)
 {
@@ -466,6 +474,10 @@ static void* getDemoCart(Console* console, ScriptLang script, s32* size)
 #if defined(TIC_BUILD_WITH_SQUIRREL)
         case SquirrelScript: strcpy(path, DefaultSquirrelTicPath); break;
 #endif          
+
+#if defined(TIC_BUILD_WITH_RUBY)
+        case Ruby: strcpy(path, DefaultRubyTicPath); break;
+#endif
         }
 
         void* data = tic_fs_loadroot(console->fs, path, size);
@@ -564,6 +576,20 @@ static void* getDemoCart(Console* console, ScriptLang script, s32* size)
         }
         break;
 #endif /* defined(TIC_BUILD_WITH_SQUIRREL) */
+
+#if defined(TIC_BUILD_WITH_RUBY)
+    case Ruby:
+        {
+            static const u8 RubyDemoRom[] =
+                {
+                    ""
+                };
+
+            demo = RubyDemoRom;
+            romSize = sizeof RubyDemoRom;
+        }
+        break;
+#endif
     }
 
     u8* data = calloc(1, sizeof(tic_cartridge));
@@ -626,6 +652,10 @@ static void onConsoleLoadDemoCommandConfirmed(Console* console, const char* para
         data = getDemoCart(console, SquirrelScript, &size);
 #endif
 
+#if defined(TIC_BUILD_WITH_RUBY)
+    if(strcmp(param, DefaultRubyTicPath) == 0)
+        data = getDemoCart(console, Ruby, &size);
+#endif
     const char* name = getCartName(param);
 
     setCartName(console, name, tic_fs_path(console->fs, name));
@@ -997,6 +1027,14 @@ static void onConsoleNewCommandConfirmed(Console* console, const char* param)
             done = true;
         }
 #endif          
+
+#if defined(TIC_BUILD_WITH_RUBY)
+        if(strcmp(param, "ruby") == 0)
+            {
+                loadDemo(console, Ruby);
+                done = true;
+            }
+#endif
 
         if(!done)
         {
@@ -1386,6 +1424,13 @@ static void onConsoleConfigCommand(Console* console, const char* param)
     {
         onConsoleLoadDemoCommand(console, DefaultSquirrelTicPath);
     }
+#endif
+
+#if defined(TIC_BUILD_WITH_RUBY)
+    else if(strcmp(param, "default ruby") == 0)
+        {
+            onConsoleLoadDemoCommand(console, DefaultRubyTicPath);
+        }
 #endif
     
     else
@@ -2962,6 +3007,8 @@ static void tick(Console* console)
             loadDemo(console, WrenScript);
 #elif defined(TIC_BUILD_WITH_SQUIRREL)
             loadDemo(console, SquirrelScript);
+#elif defined(TIC_BUILD_WITH_RUBY)
+            loadDemo(console, Ruby);
 #endif          
 
             printBack(console, "\n hello! type ");

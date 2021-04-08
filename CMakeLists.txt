@@ -286,6 +286,7 @@ set(TIC80CORE_SRC
     ${TIC80CORE_DIR}/api/lua.c 
     ${TIC80CORE_DIR}/api/wren.c 
     ${TIC80CORE_DIR}/api/squirrel.c
+    ${TIC80CORE_DIR}/api/ruby.c
     ${TIC80CORE_DIR}/tic.c
     ${TIC80CORE_DIR}/cart.c
     ${TIC80CORE_DIR}/tools.c 
@@ -306,7 +307,7 @@ target_include_directories(tic80core
         ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_SOURCE_DIR}/src)
 
-target_link_libraries(tic80core lua lpeg wren squirrel blipbuf duktape zlib)
+target_link_libraries(tic80core lua lpeg wren squirrel blipbuf duktape zlib mruby)
 
 if(BUILD_DEPRECATED)
     target_compile_definitions(tic80core PRIVATE DEPRECATED_CHUNKS)

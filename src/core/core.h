@@ -183,6 +183,10 @@ typedef struct
         struct SQVM* squirrel;
 #endif
 
+#if defined(TIC_BUILD_WITH_RUBY)
+        struct mrb_state* ruby;
+#endif
+
     };
 
     struct
@@ -232,6 +236,10 @@ const tic_script_config* getJsScriptConfig();
 
 #if defined(TIC_BUILD_WITH_WREN)
 const tic_script_config* getWrenScriptConfig();
+#endif
+
+#if defined(TIC_BUILD_WITH_RUBY)
+const tic_script_config* getRubyConfig();
 #endif
 
 void tic_core_tick_io(tic_mem* memory);
