@@ -330,9 +330,9 @@ if(BUILD_SDL AND NOT EMSCRIPTEN AND NOT RPI)
         include_directories(${ANDROID_NDK}/sources/android/cpufeatures)
     endif()
     
-    set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+    # set(SDL_SHARED OFF CACHE BOOL "" FORCE)
 
-    add_subdirectory(${THIRDPARTY_DIR}/sdl2)
+    # add_subdirectory(${THIRDPARTY_DIR}/sdl2)
 
 endif()
 
@@ -354,7 +354,7 @@ if(BUILD_SDL AND BUILD_PLAYER AND NOT RPI)
         target_link_options(player-sdl PRIVATE -static)
     endif()
 
-    target_link_libraries(player-sdl tic80core SDL2-static SDL2main)
+    target_link_libraries(player-sdl tic80core SDL2)
 endif()
 
 ################################
@@ -848,7 +848,7 @@ if(BUILD_SDL)
         endif()
 
     elseif(NOT ANDROID)
-        target_link_libraries(tic80 SDL2main)
+        # target_link_libraries(tic80 SDL2main)
     endif()
 
     target_link_libraries(tic80 tic80studio)
@@ -870,7 +870,7 @@ if(BUILD_SDL)
         elseif(RPI)
             target_link_libraries(tic80 libSDL2.a bcm_host)
         else()
-            target_link_libraries(tic80 SDL2-static)
+            target_link_libraries(tic80 SDL2)
         endif()
     endif()
 

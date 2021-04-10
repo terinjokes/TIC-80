@@ -34,7 +34,7 @@
 
 #else
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #define STUDIO_PIXEL_FORMAT SDL_PIXELFORMAT_ABGR8888
 
 #endif
