@@ -11,6 +11,7 @@
 #include <mruby.h>
 #include <mruby/compile.h>
 #include <mruby/string.h>
+#include <mruby/array.h>
 
 static const char* const RubyKeywords [] =
   {
@@ -35,7 +36,51 @@ mrb_value ruby_cls(mrb_state* mrb, mrb_value self) {
 }
 
 mrb_value ruby_spr(mrb_state* mrb, mrb_value self) {
+  static u8 colors[TIC_PALETTE_SIZE];
+  s32 count = 0;
   tic_mem* tic = (tic_mem*)mrb->ud;
+  mrb_int index, x, y;
+  mrb_int w = 1, h = 1, scale = 1, flip = 0, rotate = 0;
+
+  uint32_t kw_req = 0;
+  mrb_sym kw_names[6] = {
+    mrb_intern_cstr(mrb, "w"),
+    mrb_intern_cstr(mrb, "h"),
+    mrb_intern_cstr(mrb, "scale"),
+    mrb_intern_cstr(mrb, "flip"),
+    mrb_intern_cstr(mrb, "rotate"),
+    mrb_intern_cstr(mrb, "colorkey"),
+  };
+  mrb_value kw_values[6];
+  const mrb_kwargs kwargs = { 6, kw_req, kw_names, kw_values, NULL };
+
+  mrb_get_args(mrb, "iii:", &index, &x, &y, &kwargs);
+
+  if (!mrb_undef_p(kw_values[0])) w = mrb_int(mrb, kw_values[0]);
+  if (!mrb_undef_p(kw_values[1])) h = mrb_int(mrb, kw_values[1]);
+  if (!mrb_undef_p(kw_values[2])) scale = mrb_int(mrb, kw_values[2]);
+  if (!mrb_undef_p(kw_values[3])) flip = mrb_int(mrb, kw_values[3]);
+  if (!mrb_undef_p(kw_values[4])) rotate = mrb_int(mrb, kw_values[4]);
+
+  if (!mrb_undef_p(kw_values[5])) {
+    if (mrb_array_p(kw_values[5])) {
+      for (s32 i = 0; i < TIC_PALETTE_SIZE; i++) {
+        mrb_value color = mrb_ary_ref(mrb, kw_values[5], i);
+        if (!mrb_nil_p(color)) {
+          colors[i] = mrb_int(mrb, color);
+          count++;
+        }
+      }
+    }
+    else {
+      colors[0] = mrb_int(mrb, kw_values[5]);
+      count++;
+    }
+  }
+
+  tic_api_spr(tic, (s32)index, (s32)x, (s32)y, (s32)w, (s32)h, colors, count, (s32)scale, (s32)flip, (s32)rotate);
+
+  return self;
 }
 
 static void closeRuby(tic_mem* tic) {
@@ -52,6 +97,7 @@ static void initCore(tic_core* core) {
   mrb->ud = core;
 
   mrb_define_method(mrb, mrb->kernel_module, "cls", ruby_cls, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, mrb->kernel_module, "spr", ruby_spr, MRB_ARGS_REQ(3));
 }
 
 static bool initRuby(tic_mem* tic, const char* code) {
