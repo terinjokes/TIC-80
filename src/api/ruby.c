@@ -83,6 +83,38 @@ mrb_value ruby_spr(mrb_state* mrb, mrb_value self) {
   return self;
 }
 
+mrb_value ruby_print(mrb_state* mrb, mrb_value self) {
+  tic_mem* tic = (tic_mem*)mrb->ud;
+  const char* text;
+  mrb_int x = 0, y = 0, color = 12, scale = 1;
+  mrb_bool fixed = 0, smallfont = 0;
+
+  uint32_t kw_req = 0;
+  mrb_sym kw_names[6] = {
+    mrb_intern_cstr(mrb, "x"),
+    mrb_intern_cstr(mrb, "y"),
+    mrb_intern_cstr(mrb, "color"),
+    mrb_intern_cstr(mrb, "fixed"),
+    mrb_intern_cstr(mrb, "scale"),
+    mrb_intern_cstr(mrb, "smallfont"),
+  };
+  mrb_value kw_values[6];
+  const mrb_kwargs kwargs = { 6, kw_req, kw_names, kw_values, NULL };
+
+  mrb_get_args(mrb, "z:", &text, &kwargs);
+
+  if (!mrb_undef_p(kw_values[0])) x = mrb_int(mrb, kw_values[0]);
+  if (!mrb_undef_p(kw_values[1])) y = mrb_int(mrb, kw_values[1]);
+  if (!mrb_undef_p(kw_values[2])) color = mrb_int(mrb, kw_values[2]);
+  if (!mrb_undef_p(kw_values[3])) fixed = mrb_bool(kw_values[3]);
+  if (!mrb_undef_p(kw_values[4])) scale = mrb_int(mrb, kw_values[4]);
+  if (!mrb_undef_p(kw_values[5])) smallfont = mrb_bool(kw_values[5]);
+
+  s32 size = tic_api_print(tic, text, x, y, color, fixed, scale, smallfont);
+
+  return mrb_int_value(mrb, size);
+}
+
 static void closeRuby(tic_mem* tic) {
   tic_core* core = (tic_core*)tic;
 
@@ -98,6 +130,7 @@ static void initCore(tic_core* core) {
 
   mrb_define_method(mrb, mrb->kernel_module, "cls", ruby_cls, MRB_ARGS_REQ(1));
   mrb_define_method(mrb, mrb->kernel_module, "spr", ruby_spr, MRB_ARGS_REQ(3));
+  mrb_define_method(mrb, mrb->kernel_module, "print", ruby_print, MRB_ARGS_REQ(1));
 }
 
 static bool initRuby(tic_mem* tic, const char* code) {
